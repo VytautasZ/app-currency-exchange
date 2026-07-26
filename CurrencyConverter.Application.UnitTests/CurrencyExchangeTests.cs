@@ -67,7 +67,6 @@ public class CurrencyExchangeTests
             new CurrencyRate { MainCurrency = "NOK", MoneyCurrency = "DKK", Rate = 0.7840m },
             new CurrencyRate { MainCurrency = "CHF", MoneyCurrency = "DKK", Rate = 6.8358m },
             new CurrencyRate { MainCurrency = "JPY", MoneyCurrency = "DKK", Rate = 0.059740m },
-            new CurrencyRate { MainCurrency = "SEK", MoneyCurrency = "DKK", Rate = 0.7610m }
         };
 
     private static class CurrrencyExchangeService
@@ -84,13 +83,13 @@ public class CurrencyExchangeTests
                 return amount.ToString();
             }
 
-            if (!CurrencyRates.Any(cr => cr.MainCurrency == fromCurrency && cr.MoneyCurrency == toCurrency))
+            var rate = CurrencyRates.FirstOrDefault(cr => cr.MainCurrency == fromCurrency && cr.MoneyCurrency == toCurrency);
+            if (rate == null)
             {
                 return "Unknown currency";
             }
 
-            var rate = CurrencyRates.First(cr => cr.MainCurrency == fromCurrency && cr.MoneyCurrency == toCurrency).Rate;
-            return (amount * rate).ToString("F2");
+            return (amount * rate.Rate).ToString("F2");
         }
     }
 }
