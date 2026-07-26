@@ -1,3 +1,5 @@
+using CurrencyExchange.Domain.Models;
+
 namespace CurrencyConverter.Application.UnitTests;
 
 public class CurrencyExchangeTests
@@ -55,17 +57,17 @@ public class CurrencyExchangeTests
         Assert.Equal(expectedResult, result);
     }
 
-    private static readonly IReadOnlyDictionary<string, decimal> CurrencyRates =
-        new Dictionary<string, decimal>
+    private static readonly IReadOnlyList<CurrencyRate> CurrencyRates =
+        new List<CurrencyRate>
         {
-            ["EUR/DKK"] = 7.4394m,    
-            ["USD/DKK"] = 6.6311m,    
-            ["GBP/DKK"] = 8.5285m,    
-            ["SEK/DKK"] = 0.7610m,    
-            ["NOK/DKK"] = 0.7840m,   
-            ["CHF/DKK"] = 6.8358m,    
-            ["JPY/DKK"] = 0.059740m,  
-            ["DKK/DKK"] = 1.0m,    
+            new CurrencyRate { MainCurrency = "EUR", MoneyCurrency = "DKK", Rate = 7.4394m },
+            new CurrencyRate { MainCurrency = "USD", MoneyCurrency = "DKK", Rate = 6.6311m },
+            new CurrencyRate { MainCurrency = "GBP", MoneyCurrency = "DKK", Rate = 8.5285m },
+            new CurrencyRate { MainCurrency = "SEK", MoneyCurrency = "DKK", Rate = 0.7610m },
+            new CurrencyRate { MainCurrency = "NOK", MoneyCurrency = "DKK", Rate = 0.7840m },
+            new CurrencyRate { MainCurrency = "CHF", MoneyCurrency = "DKK", Rate = 6.8358m },
+            new CurrencyRate { MainCurrency = "JPY", MoneyCurrency = "DKK", Rate = 0.059740m },
+            new CurrencyRate { MainCurrency = "SEK", MoneyCurrency = "DKK", Rate = 0.7610m }
         };
 
     private static class CurrrencyExchangeService
@@ -82,12 +84,12 @@ public class CurrencyExchangeTests
                 return amount.ToString();
             }
 
-            CurrencyRates.TryGetValue($"{fromCurrency}/{toCurrency}", out var rate);
-            if (rate == 0)
+            if (!CurrencyRates.Any(cr => cr.MainCurrency == fromCurrency && cr.MoneyCurrency == toCurrency))
             {
                 return "Unknown currency";
             }
 
+            var rate = CurrencyRates.First(cr => cr.MainCurrency == fromCurrency && cr.MoneyCurrency == toCurrency).Rate;
             return (amount * rate).ToString("F2");
         }
     }
