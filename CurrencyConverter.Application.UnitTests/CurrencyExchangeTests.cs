@@ -26,6 +26,20 @@ public class CurrencyExchangeTests
         Assert.Equal("591", result);
     }
 
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-10)]
+    public void ExchangeCurrency_IfAmountIsNegativeOrZero_ReturnsError(decimal amount)
+    {
+        //Arange
+
+        //Act
+        var result = CurrrencyExchangeService.ExchangeCurrency("USD", "DKK", amount);
+
+        //Assert
+        Assert.Equal("Invalid amount", result);
+    }
+
     private static readonly IReadOnlyDictionary<string, decimal> CurrencyRates =
         new Dictionary<string, decimal>
         {
@@ -43,6 +57,10 @@ public class CurrencyExchangeTests
     {
         internal static string ExchangeCurrency(string fromCurrency, string toCurrency, decimal amount)
         {
+            if (amount <= 0)
+            {
+                return "Invalid amount";
+            }
 
             if (fromCurrency == toCurrency)
             {
