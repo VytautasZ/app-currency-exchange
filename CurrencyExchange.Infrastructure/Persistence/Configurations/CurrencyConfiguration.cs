@@ -23,6 +23,9 @@ internal sealed class CurrencyConfiguration : IEntityTypeConfiguration<Currency>
         builder.Property(currency => currency.DisplayName)
             .HasMaxLength(100);
 
+        builder.HasIndex(currency => currency.CurrencyCode)
+            .IsUnique();
+
         builder.HasData(SeedData.Currencies);
     }
 }

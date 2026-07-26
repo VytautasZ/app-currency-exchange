@@ -4,6 +4,7 @@ using CurrencyExchange.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CurrencyExchange.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(CurrencyExchangeDbContext))]
-    partial class CurrencyExchangeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260726204354_AddUniqueIndexOnCurrencyCode")]
+    partial class AddUniqueIndexOnCurrencyCode
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
