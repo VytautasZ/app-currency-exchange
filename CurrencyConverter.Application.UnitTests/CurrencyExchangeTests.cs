@@ -43,6 +43,21 @@ public class CurrencyExchangeTests
     }
 
     [Theory]
+    [InlineData("EUR", "DKK", 100, "743.94")]
+    [InlineData("JPY", "DKK", 100, "5.97")]
+    [InlineData("SEK", "DKK", 100, "76.10")]
+    public void ExchangeCurrency_FromDKKToForeignCurrency_ReturnsCorrectResult(string currencyFrom, string currencyTo, decimal amount, string expectedResult)
+    {
+        //Arange
+
+        //Act
+        var result = CurrrencyExchangeService.ExchangeCurrency(currencyFrom, currencyTo, amount);
+
+        //Assert
+        Assert.Equal(expectedResult, result);
+    }
+
+    [Theory]
     [InlineData("EUR", "USD", 10, "11.22")]
     [InlineData("EUR", "JPY", 10, "1245.30")]
     [InlineData("NOK", "CHF", 10, "1.15")]
@@ -67,7 +82,6 @@ public class CurrencyExchangeTests
             new CurrencyRate { MainCurrency = "NOK", MoneyCurrency = "DKK", Rate = 0.7840m },
             new CurrencyRate { MainCurrency = "CHF", MoneyCurrency = "DKK", Rate = 6.8358m },
             new CurrencyRate { MainCurrency = "JPY", MoneyCurrency = "DKK", Rate = 0.059740m },
-            new CurrencyRate { MainCurrency = "LTU", MoneyCurrency = "JPY", Rate = 0.666m },
         };
 
     private static class CurrrencyExchangeService
