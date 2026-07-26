@@ -9,4 +9,5 @@
   </Folder>
   <Project Path="CurrencyExchange.Console/CurrencyExchange.Console.csproj" />
   <Project Path="CurrencyExchange.Domain/CurrencyExchange.Domain.csproj" Id="71554a57-5460-4b72-a2ed-c91fd30aca8e" />
+  <Project Path="CurrencyExchange.Shared/CurrencyExchange.Shared.csproj" Id="a96dc3e8-f71e-4393-ab50-48cd233139a2" />
 </Solution>

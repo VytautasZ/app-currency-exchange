@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CurrencyExchange.Domain\CurrencyExchange.Domain.csproj" />
+    <ProjectReference Include="..\CurrencyExchange.Shared\CurrencyExchange.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>
