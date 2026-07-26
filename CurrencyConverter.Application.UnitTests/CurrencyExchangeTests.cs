@@ -40,6 +40,21 @@ public class CurrencyExchangeTests
         Assert.Equal("Invalid amount", result);
     }
 
+    [Theory]
+    [InlineData("EUR", "DKK", 100, "743.94")]
+    [InlineData("JPY", "DKK", 100, "5.97")]
+    [InlineData("SEK", "DKK", 100, "76.10")]
+    public void ExchangeCurrency_IfCurrencyRateIsInList_ReturnsCorrectResult(string currencyFrom, string currencyTo, decimal amount, string expectedResult)
+    {
+        //Arange
+
+        //Act
+        var result = CurrrencyExchangeService.ExchangeCurrency(currencyFrom, currencyTo, amount);
+
+        //Assert
+        Assert.Equal(expectedResult, result);
+    }
+
     private static readonly IReadOnlyDictionary<string, decimal> CurrencyRates =
         new Dictionary<string, decimal>
         {
