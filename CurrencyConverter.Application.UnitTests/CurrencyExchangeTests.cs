@@ -14,6 +14,18 @@ public class CurrencyExchangeTests
         Assert.Equal("Unknown currency", result);
     }
 
+    [Fact]
+    public void ExchangeCurrency_IfCurrenciesAreSame_ReturnsSameAmount()
+    {
+        //Arange
+
+        //Act
+        var result = CurrrencyExchangeService.ExchangeCurrency("USD", "USD", 591);
+
+        //Assert
+        Assert.Equal("591", result);
+    }
+
     private static readonly IReadOnlyDictionary<string, decimal> CurrencyRates =
         new Dictionary<string, decimal>
         {
@@ -31,9 +43,14 @@ public class CurrencyExchangeTests
     {
         internal static string ExchangeCurrency(string fromCurrency, string toCurrency, decimal amount)
         {
-            CurrencyRates.TryGetValue($"{fromCurrency}/{toCurrency}", out var rate);
 
-            if(rate == 0)
+            if (fromCurrency == toCurrency)
+            {
+                return amount.ToString();
+            }
+
+            CurrencyRates.TryGetValue($"{fromCurrency}/{toCurrency}", out var rate);
+            if (rate == 0)
             {
                 return "Unknown currency";
             }
