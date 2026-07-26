@@ -1,4 +1,5 @@
 using CurrencyExchange.Domain.Models;
+using CurrencyExchange.Shared.CurrencyResult;
 
 namespace CurrencyConverter.Application.UnitTests;
 
@@ -13,19 +14,22 @@ public class CurrencyExchangeTests
         var result = CurrrencyExchangeService.ExchangeCurrency("USD", "ABC", 100);
 
         //Assert
-        Assert.Equal("Unknown currency", result);
+        Assert.False(result.Success);
+        Assert.Equal("Unknown currency", result.Error);
     }
 
     [Fact]
     public void ExchangeCurrency_IfCurrenciesAreSame_ReturnsSameAmount()
     {
         //Arange
+        var amount = 591;
 
         //Act
-        var result = CurrrencyExchangeService.ExchangeCurrency("USD", "USD", 591);
+        var result = CurrrencyExchangeService.ExchangeCurrency("USD", "USD", amount);
 
         //Assert
-        Assert.Equal("591", result);
+        Assert.True(result.Success);
+        Assert.Equal(amount, result.Value);
     }
 
     [Theory]
@@ -39,14 +43,15 @@ public class CurrencyExchangeTests
         var result = CurrrencyExchangeService.ExchangeCurrency("USD", "DKK", amount);
 
         //Assert
-        Assert.Equal("Invalid amount", result);
+        Assert.False(result.Success);
+        Assert.Equal("Invalid amount", result.Error);
     }
 
     [Theory]
-    [InlineData("EUR", "DKK", 100, "743.94")]
-    [InlineData("JPY", "DKK", 100, "5.97")]
-    [InlineData("SEK", "DKK", 100, "76.10")]
-    public void ExchangeCurrency_FromDKKToForeignCurrency_ReturnsCorrectResult(string currencyFrom, string currencyTo, decimal amount, string expectedResult)
+    [InlineData("EUR", "DKK", 100, 743.94)]
+    [InlineData("JPY", "DKK", 100, 5.97)]
+    [InlineData("SEK", "DKK", 100, 76.10)]
+    public void ExchangeCurrency_FromForeignCurrencyToDKK_ReturnsCorrectResult(string currencyFrom, string currencyTo, decimal amount, decimal expectedResult)
     {
         //Arange
 
@@ -54,14 +59,14 @@ public class CurrencyExchangeTests
         var result = CurrrencyExchangeService.ExchangeCurrency(currencyFrom, currencyTo, amount);
 
         //Assert
-        Assert.Equal(expectedResult, result);
+        Assert.Equal(expectedResult, result.Value);
     }
 
     [Theory]
-    [InlineData("EUR", "USD", 10, "11.22")]
-    [InlineData("EUR", "JPY", 10, "1245.30")]
-    [InlineData("NOK", "CHF", 10, "1.15")]
-        public void ExchangeCurrency_IfNoDirectRatesAreInList_ReturnsCorrectResult(string currencyFrom, string currencyTo, decimal amount, string expectedResult)
+    [InlineData("DKK", "EUR", 100, 13.44)]
+    [InlineData("DKK", "JPY", 100, 1673.92)]
+    [InlineData("DKK", "SEK", 100, 131.41)]
+    public void ExchangeCurrency_FromDKKToForeignCurrency_ReturnsCorrectResult(string currencyFrom, string currencyTo, decimal amount, decimal expectedResult)
     {
         //Arange
 
@@ -69,7 +74,22 @@ public class CurrencyExchangeTests
         var result = CurrrencyExchangeService.ExchangeCurrency(currencyFrom, currencyTo, amount);
 
         //Assert
-        Assert.Equal(expectedResult, result);
+        Assert.Equal(expectedResult, result.Value);
+    }
+
+    [Theory]
+    [InlineData("EUR", "USD", 10, 11.22)]
+    [InlineData("EUR", "JPY", 10, 1245.30)]
+    [InlineData("NOK", "CHF", 10, 1.15)]
+        public void ExchangeCurrency_IfNoDirectRatesAreInList_ReturnsCorrectResult(string currencyFrom, string currencyTo, decimal amount, decimal expectedResult)
+    {
+        //Arange
+
+        //Act
+        var result = CurrrencyExchangeService.ExchangeCurrency(currencyFrom, currencyTo, amount);
+
+        //Assert
+        Assert.Equal(expectedResult, result.Value);
     }
 
     private static readonly IReadOnlyList<CurrencyRate> CurrencyRates =
@@ -81,26 +101,26 @@ public class CurrencyExchangeTests
             new CurrencyRate { MainCurrency = "SEK", MoneyCurrency = "DKK", Rate = 0.7610m },
             new CurrencyRate { MainCurrency = "NOK", MoneyCurrency = "DKK", Rate = 0.7840m },
             new CurrencyRate { MainCurrency = "CHF", MoneyCurrency = "DKK", Rate = 6.8358m },
-            new CurrencyRate { MainCurrency = "JPY", MoneyCurrency = "DKK", Rate = 0.059740m },
+            new CurrencyRate { MainCurrency = "JPY", MoneyCurrency = "DKK", Rate = 0.059740m }
         };
 
     private static class CurrrencyExchangeService
     {
-        internal static string ExchangeCurrency(string fromCurrency, string toCurrency, decimal amount)
+        internal static ExchangeResult<decimal> ExchangeCurrency(string fromCurrency, string toCurrency, decimal amount)
         {
             if (amount <= 0)
             {
-                return "Invalid amount";
+                return ExchangeResult<decimal>.Fail("Invalid amount");
             }
 
             if (fromCurrency == toCurrency)
             {
-                return amount.ToString();
+                return ExchangeResult<decimal>.Ok(amount);
             }
 
             if (!CurrencyExists(fromCurrency) || !CurrencyExists(toCurrency))
             {
-                return "Unknown currency";
+                return ExchangeResult<decimal>.Fail("Unknown currency");
             }
 
             var rate = CurrencyRates.FirstOrDefault(cr => cr.MainCurrency == fromCurrency && cr.MoneyCurrency == toCurrency);
@@ -109,7 +129,7 @@ public class CurrencyExchangeTests
                 return CalculteCrossRate(fromCurrency, toCurrency, amount);
             }
 
-            return (amount * rate.Rate).ToString("F2");
+            return ExchangeResult<decimal>.Ok(CalculateRoundedExchangedAmount(rate.Rate, amount));
         }
 
         private static bool CurrencyExists(string currency)
@@ -117,7 +137,7 @@ public class CurrencyExchangeTests
             return CurrencyRates.Any(cr => cr.MainCurrency == currency || cr.MoneyCurrency == currency);
         }
 
-        private static string CalculteCrossRate(string fromCurrency, string toCurrency, decimal amount)
+        private static ExchangeResult<decimal> CalculteCrossRate(string fromCurrency, string toCurrency, decimal amount)
         {
             var relevantCurrencyRates = CurrencyRates
                 .Where(cr => cr.MainCurrency == fromCurrency || cr.MoneyCurrency == fromCurrency
@@ -145,14 +165,14 @@ public class CurrencyExchangeTests
 
                     if (next == toCurrency)
                     {
-                        return (amount * nextFactor).ToString("F2");
+                        return ExchangeResult<decimal>.Ok(CalculateRoundedExchangedAmount(nextFactor, amount));
                     }
 
                     queue.Enqueue((next, nextFactor));
                 }
             }
 
-            return "No result was calculated";
+            return ExchangeResult<decimal>.Fail("No result was calculated");
         }
 
         private static Dictionary<string, Dictionary<string, decimal>> BuildCurrencyGraph(List<CurrencyRate> currencyRates)
@@ -177,6 +197,17 @@ public class CurrencyExchangeTests
             }
 
             return graph;
+        }
+
+        private static decimal CalculateRoundedExchangedAmount(decimal rate, decimal amount)
+        {
+            var result = amount * rate;
+            return RoundToTwoDecimalPlaces(result);
+        }
+
+        private static decimal RoundToTwoDecimalPlaces(decimal value)
+        {
+            return Math.Round(value, 2);
         }
     }
 }
