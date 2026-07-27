@@ -5,7 +5,7 @@ services:
     environment:
       ACCEPT_EULA: "Y"
       MSSQL_PID: "Developer"
-      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:?set MSSQL_SA_PASSWORD in .env - copy .env.example to .env}"
+      MSSQL_SA_PASSWORD: "Str0ng!Passw0rd#2026"
     ports:
       - "${MSSQL_PORT:-1433}:1433"
     volumes:
