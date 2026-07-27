@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CurrencyConverter.Application.UnitTests\CurrencyConverter.Application.UnitTests.csproj" />
+    <ProjectReference Include="..\CurrencyExchange.Application\CurrencyExchange.Application.csproj" />
     <ProjectReference Include="..\CurrencyExchange.Domain\CurrencyExchange.Domain.csproj" />
     <ProjectReference Include="..\CurrencyExchange.Infrastructure\CurrencyExchange.Infrastructure.csproj" />
   </ItemGroup>
