@@ -8,7 +8,7 @@
     <Project Path="CurrencyConverter.Application.UnitTests/CurrencyConverter.Application.UnitTests.csproj" Id="a7c4939a-a746-46a0-9fe1-ff38f4255b87" />
   </Folder>
   <Project Path="CurrencyExchange.Application/CurrencyExchange.Application.csproj" Id="3de83639-a0f3-475b-bc6a-3c57c471f1d7" />
-  <Project Path="CurrencyExchange.Console/CurrencyExchange.Console.csproj" />
+  <Project Path="CurrencyExchange.Console/CurrencyExchange.ConsoleUI.csproj" />
   <Project Path="CurrencyExchange.Domain/CurrencyExchange.Domain.csproj" Id="71554a57-5460-4b72-a2ed-c91fd30aca8e" />
   <Project Path="CurrencyExchange.Infrastructure/CurrencyExchange.Infrastructure.csproj" Id="cded669d-91a0-49af-87e9-417ac7477a2b" />
   <Project Path="CurrencyExchange.Shared/CurrencyExchange.Shared.csproj" Id="a96dc3e8-f71e-4393-ab50-48cd233139a2" />
