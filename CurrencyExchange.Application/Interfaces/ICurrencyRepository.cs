@@ -2,5 +2,5 @@ namespace CurrencyExchange.Application.Interfaces;
 
 public interface ICurrencyRepository
 {
-    public Task<bool> CurrencyExistsAsync(string currencyCode, CancellationToken cancellationToken);
+    public Task<bool> CurrencyExistsAsync(IEnumerable<string> currencyCodes, CancellationToken cancellationToken);
 }
