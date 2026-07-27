@@ -7,9 +7,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace CurrencyExchange.Infrastructure;
 
-public static class DependencyInjection
+public static class InfrastructureServicesRegistration
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, string connectionString)
+    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, string connectionString)
     {
         services.AddDbContext<CurrencyExchangeDbContext>(options =>
             options.UseSqlServer(connectionString, sqlServer =>
