@@ -16,41 +16,42 @@ public class CurrencyExchangeService : ICurrencyExchangeService
         _currencyRepository = currencyRepository;
     }
 
-    public async Task<ExchangeResult<decimal>> ExchangeCurrencyAsync(string fromCurrency, string toCurrency, decimal amount, CancellationToken cancellationToken)
+    public async Task<ExchangeResult<decimal>> ExchangeCurrencyAsync(CurrencyExchangeQuery currencyExchangeQuery, CancellationToken cancellationToken)
     {
-        if (amount <= 0)
+        if (currencyExchangeQuery.Amount <= 0)
         {
             return ExchangeResult<decimal>.Fail("Invalid amount");
         }
 
-        if (fromCurrency == toCurrency)
-        {
-            return ExchangeResult<decimal>.Ok(amount);
-        }
-
-        if (!await CurrencyExistsAsync(fromCurrency, cancellationToken) || !await CurrencyExistsAsync(toCurrency, cancellationToken))
+        if (!await CurrencyExistsAsync(currencyExchangeQuery, cancellationToken))
         {
             return ExchangeResult<decimal>.Fail("Unknown currency");
-        }   
-
-        var rate = await _currencyRateRepository.GetCurrencyExchangeRateAsync(fromCurrency, toCurrency, cancellationToken);
-        if (rate != null)
-        {
-            return ExchangeResult<decimal>.Ok(CalculateRoundedExchangedAmount(rate.Rate, amount));
         }
 
-        var calculatedRateResult = await CalculateExchangeRateAsync(fromCurrency, toCurrency, cancellationToken);
+        if (currencyExchangeQuery.FromCurrency == currencyExchangeQuery.ToCurrency)
+        {
+            return ExchangeResult<decimal>.Ok(currencyExchangeQuery.Amount);
+        }
+
+        var rate = await _currencyRateRepository.GetCurrencyExchangeRateAsync(currencyExchangeQuery.FromCurrency, currencyExchangeQuery.ToCurrency, cancellationToken);
+        if (rate != null)
+        {
+            return ExchangeResult<decimal>.Ok(CalculateRoundedExchangedAmount(rate.Rate, currencyExchangeQuery.Amount));
+        }
+
+        var calculatedRateResult = await CalculateExchangeRateAsync(currencyExchangeQuery.FromCurrency, currencyExchangeQuery.ToCurrency, cancellationToken);
         if (calculatedRateResult != null)
         {
-            return ExchangeResult<decimal>.Ok(CalculateRoundedExchangedAmount(calculatedRateResult.Value, amount));
+            return ExchangeResult<decimal>.Ok(CalculateRoundedExchangedAmount(calculatedRateResult.Value, currencyExchangeQuery.Amount));
         }
 
         return ExchangeResult<decimal>.Fail("No rate was calculated");
     }
 
-    private async Task<bool> CurrencyExistsAsync(string currency, CancellationToken cancellationToken)
+    private async Task<bool> CurrencyExistsAsync(CurrencyExchangeQuery currencyExchangeQuery, CancellationToken cancellationToken)
     {
-        return await _currencyRepository.CurrencyExistsAsync(currency, cancellationToken: cancellationToken);
+        var currencies = new List<string> { currencyExchangeQuery.FromCurrency, currencyExchangeQuery.ToCurrency };
+        return await _currencyRepository.CurrencyExistsAsync(currencies, cancellationToken: cancellationToken);
     }
 
     private static decimal CalculateRoundedExchangedAmount(decimal rate, decimal amount)

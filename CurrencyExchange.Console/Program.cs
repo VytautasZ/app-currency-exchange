@@ -1,5 +1,6 @@
 using CurrencyExchange.Application;
-using CurrencyExchange.ConsoleUI;
+using CurrencyExchange.ConsoleUI.DependencyInjection;
+using CurrencyExchange.ConsoleUI.Services;
 using CurrencyExchange.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,4 +18,4 @@ await using var provider = services.BuildServiceProvider(new ServiceProviderOpti
 using var scope = provider.CreateScope();
 var consoleService = scope.ServiceProvider.GetRequiredService<ICurrencyExchangeConsoleService>();
 
-consoleService.RunCurrencyExchangeApp();
+await consoleService.RunCurrencyExchangeAppAsync();
