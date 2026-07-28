@@ -22,11 +22,6 @@ public class CurrencyExchangeService : ICurrencyExchangeService
 
     public async Task<ExchangeResult<decimal>> ExchangeCurrencyAsync(CurrencyExchangeQuery currencyExchangeQuery, CancellationToken cancellationToken)
     {
-        if (currencyExchangeQuery.Amount <= 0)
-        {
-            return ExchangeResult<decimal>.Fail("Invalid amount");
-        }
-
         if (!await CurrenciesExistsAsync(currencyExchangeQuery, cancellationToken))
         {
             return ExchangeResult<decimal>.Fail("Unknown currency");

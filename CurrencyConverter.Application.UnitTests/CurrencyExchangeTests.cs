@@ -77,22 +77,6 @@ public class CurrencyExchangeTests
     }
 
     [Theory]
-    [InlineData(0)]
-    [InlineData(-10)]
-    public async Task ExchangeCurrency_IfAmountIsNegativeOrZero_ReturnsError(decimal amount)
-    {
-        //Arange
-        var currencyExchangeQuery = new CurrencyExchangeQuery() { Amount = amount, FromCurrency = "USD", ToCurrency = "DKK" };
-
-        //Act
-        var result = await _sut.ExchangeCurrencyAsync(currencyExchangeQuery, cancellationToken: default);
-
-        //Assert
-        Assert.False(result.Success);
-        Assert.Equal("Invalid amount", result.Error);
-    }
-
-    [Theory]
     [InlineData("EUR", "DKK", 100, 743.94)]
     [InlineData("JPY", "DKK", 100, 5.97)]
     [InlineData("SEK", "DKK", 100, 76.10)]
