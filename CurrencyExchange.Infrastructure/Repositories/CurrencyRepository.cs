@@ -17,6 +17,6 @@ public class CurrencyRepository : ICurrencyRepository
     {
         return await _dbContext.Currencies
             .AsNoTracking()
-            .AnyAsync(currency => currencyCodes.Contains(currency.CurrencyCode), cancellationToken);
+            .AllAsync(currency => currencyCodes.Contains(currency.CurrencyCode), cancellationToken);
     }
 }
