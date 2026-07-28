@@ -17,6 +17,7 @@ public static class InfrastructureServicesRegistration
 
         services.AddScoped<ICurrencyRepository, CurrencyRepository>();
         services.AddScoped<ICurrencyExchangeRateRepository, CurrencyExchangeRateRepository>();
+        services.AddMemoryCache();
 
         return services;
     }
