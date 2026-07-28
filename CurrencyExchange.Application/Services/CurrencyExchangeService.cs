@@ -39,8 +39,8 @@ public class CurrencyExchangeService : ICurrencyExchangeService
             return ExchangeResult<decimal>.Ok(CalculateRoundedExchangedAmount(rate.Rate, currencyExchangeQuery.Amount));
         }
 
-        var calculatedRateResult = await ResolveExchangeRateAsync(currencyExchangeQuery.FromCurrency, currencyExchangeQuery.ToCurrency, cancellationToken);
-        if (calculatedRateResult != null)
+        var calculatedRateResult = await ResolveCrossCurrencyExchangeRateAsync(currencyExchangeQuery.FromCurrency, currencyExchangeQuery.ToCurrency, cancellationToken);
+        if(calculatedRateResult != null)
         {
             return ExchangeResult<decimal>.Ok(CalculateRoundedExchangedAmount(calculatedRateResult.Value, currencyExchangeQuery.Amount));
         }
@@ -66,79 +66,14 @@ public class CurrencyExchangeService : ICurrencyExchangeService
         return Math.Round(value, 2, MidpointRounding.AwayFromZero);
     }
 
-    private async Task<decimal?> ResolveExchangeRateAsync(string fromCurrency, string toCurrency, CancellationToken cancellationToken)
+    private async Task<decimal?> ResolveCrossCurrencyExchangeRateAsync(string fromCurrency, string toCurrency, CancellationToken cancellationToken)
     {
         var currencyRates = await _currencyRateRepository.GetAllCurrencyExchangeRatesAsync(cancellationToken);
-
-        if(currencyRates == null || !currencyRates.Any())
+        if (currencyRates == null || !currencyRates.Any())
         {
             return null;
         }
 
-        var graph = BuildCurrencyGraph(currencyRates);
-        var calculatedExchangeRate = TraverseAndCalculateCurencyGraph(graph, fromCurrency, toCurrency);
-
-        return calculatedExchangeRate;
-    }
-
-    private static Dictionary<string, Dictionary<string, decimal>> BuildCurrencyGraph(IEnumerable<CurrencyRate> currencyRates)
-    {
-        var graph = new Dictionary<string, Dictionary<string, decimal>>();
-
-        void AddEdge(string from, string to, decimal rate)
-        {
-            if (!graph.TryGetValue(from, out var edges))
-            {
-                edges = new Dictionary<string, decimal>();
-                graph[from] = edges;
-            }
-
-            edges[to] = rate;
-        }
-
-        foreach (var rate in currencyRates)
-        {
-            if (rate.Rate <= 0)
-            {
-                continue;
-            }
-
-            AddEdge(rate.MainCurrency, rate.MoneyCurrency, rate.Rate);
-            AddEdge(rate.MoneyCurrency, rate.MainCurrency, 1m / rate.Rate);
-        }
-
-        return graph;
-    }
-
-    private static decimal? TraverseAndCalculateCurencyGraph(Dictionary<string, Dictionary<string, decimal>> graph, string fromCurrency, string toCurrency)
-    {
-        var queue = new Queue<(string Currency, decimal Factor )>();
-        var visited = new HashSet<string> { fromCurrency };
-
-        queue.Enqueue((fromCurrency, 1m));
-
-        while (queue.Count > 0)
-        {
-            var (currency, factor) = queue.Dequeue();
-
-            foreach (var (nextCurrency, rate) in graph[currency])
-            {
-                if (!visited.Add(nextCurrency))
-                {
-                    continue;
-                }
-
-                var calculatedRate = factor * rate;
-
-                if (nextCurrency == toCurrency)
-                {
-                    return calculatedRate;
-                }
-
-                queue.Enqueue((nextCurrency, calculatedRate));
-            }
-        }
-
-        return null;
+       return CrossCurrencyRateResolver.ResolveExchangeRateAsync(fromCurrency, toCurrency, currencyRates, cancellationToken);
     }
 }
