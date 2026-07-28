@@ -14,13 +14,6 @@ public class CurrencyExchangeRateRepository : ICurrencyExchangeRateRepository
         _dbContext = dbContext;
     }
 
-    public async Task<bool> CurrencyExistsAsync(string currency, CancellationToken cancellationToken)
-    {
-        return await _dbContext.CurrencyRates
-            .AsNoTracking()
-            .AnyAsync(rate => rate.MainCurrency == currency || rate.MoneyCurrency == currency, cancellationToken);
-    }
-
     public async Task<IEnumerable<CurrencyRate>> GetAllCurrencyExchangeRatesAsync(CancellationToken cancellationToken)
     {
         return await _dbContext.CurrencyRates

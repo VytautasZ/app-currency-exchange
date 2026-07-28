@@ -22,13 +22,33 @@ public class CurrencyExchangeTests
     {
         //Arange
         var currencyExchangeQuery = new CurrencyExchangeQuery() { Amount = 100, FromCurrency = "USD", ToCurrency = "ABC" };
-        var currencies = new List<string> { currencyExchangeQuery.FromCurrency, currencyExchangeQuery.ToCurrency };
+        var currencies = new List<string> { currencyExchangeQuery.FromCurrency, currencyExchangeQuery.ToCurrency }.AsEnumerable();
+        
         _currencyRepository
-           .CurrencyExistsAsync(Arg.Is<IEnumerable<string>>(c => c != null && c.SequenceEqual(currencies)), Arg.Any<CancellationToken>())
-           .Returns(false);
+           .GetCountOfExistingCurrienciesAsync(Arg.Is<IEnumerable<string>>(c => c != null && c.SequenceEqual(currencies)), Arg.Any<CancellationToken>())
+           .Returns(1);
 
         //Act
         var result = await _sut.ExchangeCurrencyAsync(currencyExchangeQuery, cancellationToken:default);
+
+        //Assert
+        Assert.False(result.Success);
+        Assert.Equal("Unknown currency", result.Error);
+    }
+
+    [Fact]
+    public async Task ExchangeCurrency_IfBothCurrenciesUnknown_ReturnsErrorMessage()
+    {
+        //Arange
+        var currencyExchangeQuery = new CurrencyExchangeQuery() { Amount = 100, FromCurrency = "ABC", ToCurrency = "ABC" };
+        var currencies = new List<string> { currencyExchangeQuery.FromCurrency, currencyExchangeQuery.ToCurrency }.AsEnumerable();
+
+        _currencyRepository
+           .GetCountOfExistingCurrienciesAsync(Arg.Is<IEnumerable<string>>(c => c != null && c.SequenceEqual(currencies)), Arg.Any<CancellationToken>())
+           .Returns(0);
+
+        //Act
+        var result = await _sut.ExchangeCurrencyAsync(currencyExchangeQuery, cancellationToken: default);
 
         //Assert
         Assert.False(result.Success);
@@ -41,10 +61,10 @@ public class CurrencyExchangeTests
         //Arange
         var currencyExchangeQuery = new CurrencyExchangeQuery() { Amount = 100, FromCurrency = "USD", ToCurrency = "USD" };
 
-        var currencies = new List<string> { currencyExchangeQuery.FromCurrency, currencyExchangeQuery.ToCurrency };
+        var currencies = new List<string> { currencyExchangeQuery.FromCurrency};
         _currencyRepository
-           .CurrencyExistsAsync(Arg.Is<IEnumerable<string>>(c => c != null && c.SequenceEqual(currencies)), Arg.Any<CancellationToken>())
-           .Returns(true);
+           .GetCountOfExistingCurrienciesAsync(Arg.Is<IEnumerable<string>>(c => c != null && c.SequenceEqual(currencies)), Arg.Any<CancellationToken>())
+           .Returns(1);
 
         //Act
         var result = await _sut.ExchangeCurrencyAsync(currencyExchangeQuery, cancellationToken: default);
@@ -81,8 +101,8 @@ public class CurrencyExchangeTests
         var currencies = new List<string> { currencyExchangeQuery.FromCurrency, currencyExchangeQuery.ToCurrency };
 
         _currencyRepository
-           .CurrencyExistsAsync(Arg.Is<IEnumerable<string>>(c => c != null && c.SequenceEqual(currencies)), Arg.Any<CancellationToken>())
-           .Returns(true);
+           .GetCountOfExistingCurrienciesAsync(Arg.Is<IEnumerable<string>>(c => c != null && c.SequenceEqual(currencies)), Arg.Any<CancellationToken>())
+           .Returns(2);
 
         _currencyRateRepository
            .GetCurrencyExchangeRateAsync(currencyExchangeQuery.FromCurrency, currencyExchangeQuery.ToCurrency, Arg.Any<CancellationToken>())
@@ -110,8 +130,8 @@ public class CurrencyExchangeTests
         var currencies = new List<string> { currencyExchangeQuery.FromCurrency, currencyExchangeQuery.ToCurrency };
 
         _currencyRepository
-           .CurrencyExistsAsync(Arg.Is<IEnumerable<string>>(c => c != null && c.SequenceEqual(currencies)), Arg.Any<CancellationToken>())
-           .Returns(true);
+           .GetCountOfExistingCurrienciesAsync(Arg.Is<IEnumerable<string>>(c => c != null && c.SequenceEqual(currencies)), Arg.Any<CancellationToken>())
+           .Returns(2);
 
         _currencyRateRepository
            .GetCurrencyExchangeRateAsync(currencyExchangeQuery.FromCurrency, currencyExchangeQuery.ToCurrency, Arg.Any<CancellationToken>())
@@ -144,8 +164,8 @@ public class CurrencyExchangeTests
            .Returns(Task.FromResult<CurrencyRate?>(null));
 
         _currencyRepository
-          .CurrencyExistsAsync(Arg.Is<IEnumerable<string>>(c => c != null && c.SequenceEqual(currencies)), Arg.Any<CancellationToken>())
-          .Returns(true);
+          .GetCountOfExistingCurrienciesAsync(Arg.Is<IEnumerable<string>>(c => c != null && c.SequenceEqual(currencies)), Arg.Any<CancellationToken>())
+          .Returns(2);
 
         _currencyRateRepository
            .GetAllCurrencyExchangeRatesAsync(Arg.Any<CancellationToken>())

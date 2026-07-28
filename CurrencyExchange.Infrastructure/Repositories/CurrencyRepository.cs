@@ -13,10 +13,10 @@ public class CurrencyRepository : ICurrencyRepository
         _dbContext = dbContext;
     }
 
-    public async Task<bool> CurrencyExistsAsync(IEnumerable<string> currencyCodes, CancellationToken cancellationToken)
+    public async Task<int> GetCountOfExistingCurrienciesAsync(IEnumerable<string> currencyCodes, CancellationToken cancellationToken)
     {
         return await _dbContext.Currencies
             .AsNoTracking()
-            .AnyAsync(currency => currencyCodes.Contains(currency.CurrencyCode), cancellationToken);
+            .CountAsync(currency => currencyCodes.Contains(currency.CurrencyCode), cancellationToken);
     }
 }
