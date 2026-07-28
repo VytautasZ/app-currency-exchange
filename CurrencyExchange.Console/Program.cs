@@ -40,6 +40,6 @@ await using var provider = services.BuildServiceProvider(new ServiceProviderOpti
 await provider.MigrateDatabaseAsync();
 
 using var scope = provider.CreateScope();
-var consoleService = scope.ServiceProvider.GetRequiredService<ICurrencyExchangeConsoleService>();
+var consoleService = scope.ServiceProvider.GetRequiredService<IConsoleUIService>();
 
-await consoleService.RunCurrencyExchangeAppAsync();
+await consoleService.RunCurrencyExchangeConsoleUIAsync();

@@ -3,16 +3,16 @@ using CurrencyExchange.ConsoleUI.Helpers;
 
 namespace CurrencyExchange.ConsoleUI.Services;
 
-internal class CurrencyExchangeConsoleService : ICurrencyExchangeConsoleService
+internal class ConsoleUIService : IConsoleUIService
 {
-    private readonly ICurrencyExchangeService _currencyExchangeService;
+    private readonly ICurrencyExchangeManager _currencyExchangeManager;
 
-    public CurrencyExchangeConsoleService(ICurrencyExchangeService currencyExchangeService)
+    public ConsoleUIService(ICurrencyExchangeManager currencyExchangeManager)
     {
-        _currencyExchangeService = currencyExchangeService;
+        _currencyExchangeManager = currencyExchangeManager;
     }
 
-    public async Task RunCurrencyExchangeAppAsync()
+    public async Task RunCurrencyExchangeConsoleUIAsync()
     {
         var endApp = false;
         Console.WriteLine("Currency Exchange Calculator\r");
@@ -33,7 +33,7 @@ internal class CurrencyExchangeConsoleService : ICurrencyExchangeConsoleService
                 continue;
             }
 
-            var exchangeResult = await _currencyExchangeService.ExchangeCurrencyAsync(exchangeQuery.Value, cancellationToken: default);
+            var exchangeResult = await _currencyExchangeManager.ProceedCurrencyExchangeAsync(exchangeQuery.Value, cancellationToken: default);
 
             if (!exchangeResult.Success)
             {
