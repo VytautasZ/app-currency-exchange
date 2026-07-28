@@ -6,6 +6,7 @@
   <Folder Name="/Tests/" />
   <Folder Name="/Tests/UnitTests/">
     <Project Path="CurrencyConverter.Application.UnitTests/CurrencyConverter.Application.UnitTests.csproj" Id="a7c4939a-a746-46a0-9fe1-ff38f4255b87" />
+    <Project Path="CurrencyExchange.Shared.UnitTests/CurrencyExchange.Shared.UnitTests.csproj" />
   </Folder>
   <Project Path="CurrencyExchange.Application/CurrencyExchange.Application.csproj" Id="3de83639-a0f3-475b-bc6a-3c57c471f1d7" />
   <Project Path="CurrencyExchange.Console/CurrencyExchange.ConsoleUI.csproj" />
