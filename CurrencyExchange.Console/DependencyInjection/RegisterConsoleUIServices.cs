@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace CurrencyExchange.ConsoleUI.DependencyInjection;
 
-public static class RegisterConsoleServices
+public static class RegisterConsoleUIServices
 {
     public static IServiceCollection AddConsoleServices(this IServiceCollection services)
     {
