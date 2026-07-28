@@ -1,7 +1,6 @@
-
 using CurrencyExchange.ConsoleUI.Helpers;
 
-namespace CurrencyConverter.Application.UnitTests;
+namespace CurrencyExchange.ConsoleUI.UnitTests;
 
 public class CurrencyExchangeQueryParserTests
 {
