@@ -1,5 +1,5 @@
 using CurrencyExchange.Application.Interfaces;
-using CurrencyExchange.ConsoleUI.Mapper;
+using CurrencyExchange.ConsoleUI.Helpers;
 
 namespace CurrencyExchange.ConsoleUI.Services;
 
@@ -24,15 +24,16 @@ internal class CurrencyExchangeConsoleService : ICurrencyExchangeConsoleService
             Console.WriteLine("Exchange <currency pair> <amount to change> ");
             Console.WriteLine("Example: Exchange USD/EUR 100 ");
 
-            var exchangeQuery = Console.ReadLine();
+            var exchangeQueryRaw = Console.ReadLine();
+            var exchangeQuery = CurrencyExchangeQueryParser.ParseQueryString(exchangeQueryRaw);
 
-            if (!CurrencyExchangeUserInputValidator.Validate(exchangeQuery))
+            if (!exchangeQuery.Success)
             {
-                Console.WriteLine("Could not read query. Use the format: Exchange USD/EUR 100\n");
+                Console.WriteLine($"{exchangeQuery.Error}\n");
                 continue;
             }
 
-            var exchangeResult = await _currencyExchangeService.ExchangeCurrencyAsync(exchangeQuery.ToCurrencyExchangeQuery(), cancellationToken: default);
+            var exchangeResult = await _currencyExchangeService.ExchangeCurrencyAsync(exchangeQuery.Value, cancellationToken: default);
 
             if (!exchangeResult.Success)
             {
@@ -41,9 +42,7 @@ internal class CurrencyExchangeConsoleService : ICurrencyExchangeConsoleService
             }
 
             Console.WriteLine($"{exchangeResult.Value}\n");
-
             Console.WriteLine("------------------------\n");
-
             Console.Write("Press 'n' and Enter to close the app, or press any other key and Enter to continue: ");
 
             var exitInput = Console.ReadLine();
