@@ -7,7 +7,7 @@ public static class RegisterConsoleUIServices
 {
     public static IServiceCollection AddConsoleServices(this IServiceCollection services)
     {
-        services.AddScoped<ICurrencyExchangeConsoleService, CurrencyExchangeConsoleService>();
+        services.AddScoped<IConsoleUIService, ConsoleUIService>();
 
         return services;
     }

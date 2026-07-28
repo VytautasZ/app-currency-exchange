@@ -10,23 +10,16 @@ namespace CurrencyExchange.Application.Services;
 public class CurrencyExchangeService : ICurrencyExchangeService
 {
     private readonly ICurrencyExchangeRateRepository _currencyRateRepository;
-    private readonly ICurrencyRepository _currencyRepository;
     private readonly IMemoryCache memoryCache;
 
-    public CurrencyExchangeService(ICurrencyExchangeRateRepository currencyRateRepository, ICurrencyRepository currencyRepository, IMemoryCache memoryCache)
+    public CurrencyExchangeService(ICurrencyExchangeRateRepository currencyRateRepository, IMemoryCache memoryCache)
     {
         _currencyRateRepository = currencyRateRepository;
-        _currencyRepository = currencyRepository;
         this.memoryCache = memoryCache;
     }
 
     public async Task<ExchangeResult<decimal>> ExchangeCurrencyAsync(CurrencyExchangeQuery currencyExchangeQuery, CancellationToken cancellationToken)
     {
-        if (!await CurrenciesExistsAsync(currencyExchangeQuery, cancellationToken))
-        {
-            return ExchangeResult<decimal>.Fail("Unknown currency");
-        }
-
         if (currencyExchangeQuery.FromCurrency == currencyExchangeQuery.ToCurrency)
         {
             return ExchangeResult<decimal>.Ok(currencyExchangeQuery.Amount);
@@ -45,13 +38,6 @@ public class CurrencyExchangeService : ICurrencyExchangeService
         }
 
         return ExchangeResult<decimal>.Fail("No rate was calculated");
-    }
-
-    private async Task<bool> CurrenciesExistsAsync(CurrencyExchangeQuery currencyExchangeQuery, CancellationToken cancellationToken)
-    {
-        var currencies = new List<string> { currencyExchangeQuery.FromCurrency, currencyExchangeQuery.ToCurrency }.Distinct().ToList();
-        var existingCurenciesCount = await _currencyRepository.GetCountOfExistingCurrienciesAsync(currencies, cancellationToken: cancellationToken);
-        return currencies.Count == existingCurenciesCount;
     }
 
     private static decimal CalculateRoundedExchangedAmount(decimal rate, decimal amount)
