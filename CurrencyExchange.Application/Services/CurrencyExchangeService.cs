@@ -2,6 +2,7 @@ using CurrencyExchange.Application.Interfaces;
 using CurrencyExchange.Domain.Models;
 using CurrencyExchange.Interfaces.Application;
 using CurrencyExchange.Shared.CurrencyResult;
+using CurrencyExchange.Shared.Extencions;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace CurrencyExchange.Application.Services;
@@ -61,12 +62,7 @@ public class CurrencyExchangeService : ICurrencyExchangeService
     private static decimal CalculateRoundedExchangedAmount(decimal rate, decimal amount)
     {
         var result = amount * rate;
-        return RoundToTwoDecimalPlaces(result);
-    }
-
-    private static decimal RoundToTwoDecimalPlaces(decimal value)
-    {
-        return Math.Round(value, 2, MidpointRounding.AwayFromZero);
+        return result.RoundToGivenDecimalPlaces(2);
     }
 
     private async Task<decimal?> ResolveCrossCurrencyExchangeRateAsync(string fromCurrency, string toCurrency, CancellationToken cancellationToken)
