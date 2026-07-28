@@ -2,6 +2,7 @@ using CurrencyExchange.Application.Interfaces;
 using CurrencyExchange.Application.Services;
 using Microsoft.Extensions.DependencyInjection;
 
+
 namespace CurrencyExchange.Application;
 
 public static class ApplicationServicesRegistration

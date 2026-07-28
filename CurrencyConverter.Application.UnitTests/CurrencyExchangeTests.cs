@@ -2,6 +2,7 @@ using CurrencyExchange.Application.Interfaces;
 using CurrencyExchange.Application.Services;
 using CurrencyExchange.Domain.Models;
 using CurrencyExchange.Interfaces.Application;
+using Microsoft.Extensions.Caching.Memory;
 using NSubstitute;
 
 namespace CurrencyConverter.Application.UnitTests;
@@ -10,11 +11,12 @@ public class CurrencyExchangeTests
 {
     private readonly ICurrencyExchangeRateRepository _currencyRateRepository = Substitute.For<ICurrencyExchangeRateRepository>();
     private readonly ICurrencyRepository _currencyRepository = Substitute.For<ICurrencyRepository>();
+    private readonly IMemoryCache _memoryCache = new MemoryCache(new MemoryCacheOptions());
     private readonly CurrencyExchangeService _sut;
 
     public CurrencyExchangeTests()
     {
-        _sut = new CurrencyExchangeService(_currencyRateRepository, _currencyRepository);
+        _sut = new CurrencyExchangeService(_currencyRateRepository, _currencyRepository, _memoryCache);
     }
 
     [Fact]

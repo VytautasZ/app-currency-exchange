@@ -2,6 +2,7 @@ using CurrencyExchange.Application.Interfaces;
 using CurrencyExchange.Domain.Models;
 using CurrencyExchange.Interfaces.Application;
 using CurrencyExchange.Shared.CurrencyResult;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace CurrencyExchange.Application.Services;
 
@@ -9,11 +10,13 @@ public class CurrencyExchangeService : ICurrencyExchangeService
 {
     private readonly ICurrencyExchangeRateRepository _currencyRateRepository;
     private readonly ICurrencyRepository _currencyRepository;
+    private readonly IMemoryCache memoryCache;
 
-    public CurrencyExchangeService(ICurrencyExchangeRateRepository currencyRateRepository, ICurrencyRepository currencyRepository)
+    public CurrencyExchangeService(ICurrencyExchangeRateRepository currencyRateRepository, ICurrencyRepository currencyRepository, IMemoryCache memoryCache)
     {
         _currencyRateRepository = currencyRateRepository;
         _currencyRepository = currencyRepository;
+        this.memoryCache = memoryCache;
     }
 
     public async Task<ExchangeResult<decimal>> ExchangeCurrencyAsync(CurrencyExchangeQuery currencyExchangeQuery, CancellationToken cancellationToken)
@@ -68,12 +71,28 @@ public class CurrencyExchangeService : ICurrencyExchangeService
 
     private async Task<decimal?> ResolveCrossCurrencyExchangeRateAsync(string fromCurrency, string toCurrency, CancellationToken cancellationToken)
     {
-        var currencyRates = await _currencyRateRepository.GetAllCurrencyExchangeRatesAsync(cancellationToken);
+        var currencyRates = await GetAllCurrencyRates(cancellationToken);
         if (currencyRates == null || !currencyRates.Any())
         {
             return null;
         }
 
        return CrossCurrencyRateResolver.ResolveExchangeRateAsync(fromCurrency, toCurrency, currencyRates, cancellationToken);
+    }
+
+    private async Task<IEnumerable<CurrencyRate>> GetAllCurrencyRates(CancellationToken cancellationToken)
+    {
+        string key = "allcurrencyrates";
+        if (!memoryCache.TryGetValue(key, out IEnumerable<CurrencyRate>? currencyRates))
+        {
+            currencyRates = await _currencyRateRepository.GetAllCurrencyExchangeRatesAsync(cancellationToken);
+
+            var cacheOptions = new MemoryCacheEntryOptions()
+                .SetSlidingExpiration(TimeSpan.FromSeconds(10))
+                .SetAbsoluteExpiration(TimeSpan.FromSeconds(30));
+
+            memoryCache.Set(key, currencyRates, cacheOptions);
+        }
+        return currencyRates ?? Array.Empty<CurrencyRate>();
     }
 }
