@@ -23,7 +23,7 @@ public class CurrencyExchangeService : ICurrencyExchangeService
             return ExchangeResult<decimal>.Fail("Invalid amount");
         }
 
-        if (!await CurrencyExistsAsync(currencyExchangeQuery, cancellationToken))
+        if (!await CurrenciesExistsAsync(currencyExchangeQuery, cancellationToken))
         {
             return ExchangeResult<decimal>.Fail("Unknown currency");
         }
@@ -39,7 +39,7 @@ public class CurrencyExchangeService : ICurrencyExchangeService
             return ExchangeResult<decimal>.Ok(CalculateRoundedExchangedAmount(rate.Rate, currencyExchangeQuery.Amount));
         }
 
-        var calculatedRateResult = await CalculateExchangeRateAsync(currencyExchangeQuery.FromCurrency, currencyExchangeQuery.ToCurrency, cancellationToken);
+        var calculatedRateResult = await ResolveExchangeRateAsync(currencyExchangeQuery.FromCurrency, currencyExchangeQuery.ToCurrency, cancellationToken);
         if (calculatedRateResult != null)
         {
             return ExchangeResult<decimal>.Ok(CalculateRoundedExchangedAmount(calculatedRateResult.Value, currencyExchangeQuery.Amount));
@@ -48,10 +48,11 @@ public class CurrencyExchangeService : ICurrencyExchangeService
         return ExchangeResult<decimal>.Fail("No rate was calculated");
     }
 
-    private async Task<bool> CurrencyExistsAsync(CurrencyExchangeQuery currencyExchangeQuery, CancellationToken cancellationToken)
+    private async Task<bool> CurrenciesExistsAsync(CurrencyExchangeQuery currencyExchangeQuery, CancellationToken cancellationToken)
     {
-        var currencies = new List<string> { currencyExchangeQuery.FromCurrency, currencyExchangeQuery.ToCurrency };
-        return await _currencyRepository.CurrencyExistsAsync(currencies, cancellationToken: cancellationToken);
+        var currencies = new List<string> { currencyExchangeQuery.FromCurrency, currencyExchangeQuery.ToCurrency }.Distinct().ToList();
+        var existingCurenciesCount = await _currencyRepository.GetCountOfExistingCurrienciesAsync(currencies, cancellationToken: cancellationToken);
+        return currencies.Count == existingCurenciesCount;
     }
 
     private static decimal CalculateRoundedExchangedAmount(decimal rate, decimal amount)
@@ -65,7 +66,7 @@ public class CurrencyExchangeService : ICurrencyExchangeService
         return Math.Round(value, 2, MidpointRounding.AwayFromZero);
     }
 
-    private async Task<decimal?> CalculateExchangeRateAsync(string fromCurrency, string toCurrency, CancellationToken cancellationToken)
+    private async Task<decimal?> ResolveExchangeRateAsync(string fromCurrency, string toCurrency, CancellationToken cancellationToken)
     {
         var currencyRates = await _currencyRateRepository.GetAllCurrencyExchangeRatesAsync(cancellationToken);
 

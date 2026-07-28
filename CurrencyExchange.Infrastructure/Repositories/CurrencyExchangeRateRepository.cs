@@ -14,7 +14,6 @@ public class CurrencyExchangeRateRepository : ICurrencyExchangeRateRepository
         _dbContext = dbContext;
     }
 
-
     public async Task<IEnumerable<CurrencyRate>> GetAllCurrencyExchangeRatesAsync(CancellationToken cancellationToken)
     {
         return await _dbContext.CurrencyRates
