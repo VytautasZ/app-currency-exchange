@@ -20,13 +20,4 @@ public class CurrencyExchangeRateRepository : ICurrencyExchangeRateRepository
             .AsNoTracking()
             .ToListAsync(cancellationToken);
     }
-
-    public async Task<CurrencyRate?> GetCurrencyExchangeRateAsync(string mainCurrency, string moneyCurrency, CancellationToken cancellationToken)
-    {
-        return await _dbContext.CurrencyRates
-            .AsNoTracking()
-            .FirstOrDefaultAsync(
-                rate => rate.MainCurrency == mainCurrency && rate.MoneyCurrency == moneyCurrency,
-                cancellationToken);
-    }
 }

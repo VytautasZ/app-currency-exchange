@@ -6,6 +6,11 @@ public static class CrossCurrencyRateResolver
 {
     public static decimal? ResolveExchangeRateAsync(string fromCurrency, string toCurrency, IEnumerable<CurrencyRate> currencyRates, CancellationToken cancellationToken)
     {
+        if(fromCurrency == toCurrency)
+        {
+            return 1m;
+        }
+
         var graph = BuildCurrencyGraph(currencyRates);
         var calculatedExchangeRate = FindCurrencyRateFromGraph(graph, fromCurrency, toCurrency);
 
