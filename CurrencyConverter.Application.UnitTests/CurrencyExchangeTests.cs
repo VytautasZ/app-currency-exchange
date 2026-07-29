@@ -23,6 +23,10 @@ public class CurrencyExchangeTests
         //Arange
         var currencyExchangeQuery = new CurrencyExchangeQuery() { Amount = 100, FromCurrency = "USD", ToCurrency = "USD" };
 
+        _currencyRateRepository
+           .GetAllCurrencyExchangeRatesAsync(Arg.Any<CancellationToken>())
+           .Returns(CurrencyRates);
+
         //Act
         var result = await _sut.ExchangeCurrencyAsync(currencyExchangeQuery, cancellationToken: default);
 
@@ -41,12 +45,8 @@ public class CurrencyExchangeTests
         var currencyExchangeQuery = new CurrencyExchangeQuery() { Amount = amount, FromCurrency = currencyFrom, ToCurrency = currencyTo };
 
         _currencyRateRepository
-           .GetCurrencyExchangeRateAsync(currencyExchangeQuery.FromCurrency, currencyExchangeQuery.ToCurrency, Arg.Any<CancellationToken>())
-           .Returns(new CurrencyRate {
-               MainCurrency = currencyExchangeQuery.FromCurrency,
-               MoneyCurrency = currencyExchangeQuery.ToCurrency,
-               Rate = CurrencyRates.First(r => r.MainCurrency == currencyExchangeQuery.FromCurrency && r.MoneyCurrency == currencyExchangeQuery.ToCurrency).Rate
-           });
+           .GetAllCurrencyExchangeRatesAsync(Arg.Any<CancellationToken>())
+           .Returns(CurrencyRates);
 
         //Act
         var result = await _sut.ExchangeCurrencyAsync(currencyExchangeQuery, cancellationToken: default);
@@ -63,10 +63,6 @@ public class CurrencyExchangeTests
     {
         //Arange
         var currencyExchangeQuery = new CurrencyExchangeQuery() { Amount = amount, FromCurrency = currencyFrom, ToCurrency = currencyTo };
-
-        _currencyRateRepository
-           .GetCurrencyExchangeRateAsync(currencyExchangeQuery.FromCurrency, currencyExchangeQuery.ToCurrency, Arg.Any<CancellationToken>())
-           .Returns(Task.FromResult<CurrencyRate?>(null));
 
         _currencyRateRepository
            .GetAllCurrencyExchangeRatesAsync(Arg.Any<CancellationToken>())
@@ -90,10 +86,6 @@ public class CurrencyExchangeTests
         var currencyExchangeQuery = new CurrencyExchangeQuery() { Amount = amount, FromCurrency = currencyFrom, ToCurrency = currencyTo };
 
         _currencyRateRepository
-           .GetCurrencyExchangeRateAsync(currencyExchangeQuery.FromCurrency, currencyExchangeQuery.ToCurrency, Arg.Any<CancellationToken>())
-           .Returns(Task.FromResult<CurrencyRate?>(null));
-
-        _currencyRateRepository
            .GetAllCurrencyExchangeRatesAsync(Arg.Any<CancellationToken>())
            .Returns(CurrencyRates);
 
@@ -109,10 +101,6 @@ public class CurrencyExchangeTests
     {
         //Arange
         var currencyExchangeQuery = new CurrencyExchangeQuery() { Amount = 100, FromCurrency = "EUR", ToCurrency = "GBP" };
-
-        _currencyRateRepository
-           .GetCurrencyExchangeRateAsync(currencyExchangeQuery.FromCurrency, currencyExchangeQuery.ToCurrency, Arg.Any<CancellationToken>())
-           .Returns(Task.FromResult<CurrencyRate?>(null));
 
         _currencyRateRepository
            .GetAllCurrencyExchangeRatesAsync(Arg.Any<CancellationToken>())
@@ -136,6 +124,7 @@ public class CurrencyExchangeTests
             new CurrencyRate { MainCurrency = "NOK", MoneyCurrency = "DKK", Rate = 0.7840m },
             new CurrencyRate { MainCurrency = "CHF", MoneyCurrency = "DKK", Rate = 6.8358m },
             new CurrencyRate { MainCurrency = "JPY", MoneyCurrency = "DKK", Rate = 0.059740m },
+            new CurrencyRate { MainCurrency = "DKK", MoneyCurrency = "DKK", Rate = 1m },
             new CurrencyRate { MainCurrency = "LTU", MoneyCurrency = "JPY", Rate = 3.4528m }
         };
 }

@@ -20,19 +20,8 @@ public class CurrencyExchangeService : ICurrencyExchangeService
 
     public async Task<ExchangeResult<decimal>> ExchangeCurrencyAsync(CurrencyExchangeQuery currencyExchangeQuery, CancellationToken cancellationToken)
     {
-        if (currencyExchangeQuery.FromCurrency == currencyExchangeQuery.ToCurrency)
-        {
-            return ExchangeResult<decimal>.Ok(currencyExchangeQuery.Amount);
-        }
-
-        var rate = await _currencyRateRepository.GetCurrencyExchangeRateAsync(currencyExchangeQuery.FromCurrency, currencyExchangeQuery.ToCurrency, cancellationToken);
-        if (rate != null)
-        {
-            return ExchangeResult<decimal>.Ok(CalculateRoundedExchangedAmount(rate.Rate, currencyExchangeQuery.Amount));
-        }
-
         var calculatedRateResult = await ResolveCrossCurrencyExchangeRateAsync(currencyExchangeQuery.FromCurrency, currencyExchangeQuery.ToCurrency, cancellationToken);
-        if(calculatedRateResult != null)
+        if (calculatedRateResult != null)
         {
             return ExchangeResult<decimal>.Ok(CalculateRoundedExchangedAmount(calculatedRateResult.Value, currencyExchangeQuery.Amount));
         }
@@ -54,7 +43,7 @@ public class CurrencyExchangeService : ICurrencyExchangeService
             return null;
         }
 
-       return CrossCurrencyRateResolver.ResolveExchangeRateAsync(fromCurrency, toCurrency, currencyRates, cancellationToken);
+        return CrossCurrencyRateResolver.ResolveExchangeRateAsync(fromCurrency, toCurrency, currencyRates, cancellationToken);
     }
 
     private async Task<IEnumerable<CurrencyRate>> GetAllCurrencyRates(CancellationToken cancellationToken)
